@@ -76,7 +76,7 @@ export default function ResultsCard({ model_name, result, url }: any) {
 
         // Build the curl commands
         const cmds = digests.map(digest => {
-            const filename = digest.replace(":", "-");
+            const filename = "blobs/" + digest.replace(":", "-");
             return `curl -L "${BASE_URL}${digest}" -o "${filename}"`;
         });
 
@@ -84,7 +84,15 @@ export default function ResultsCard({ model_name, result, url }: any) {
     }
 
     function generateManifestCurlCommand() {
-        const filename = url.split("/").pop();
+        // example url: https://registry.ollama.ai/v2/library/gemma3/manifests/27b
+        const urlComponents = url.split("/");
+        const filename = [
+          "manifests",
+          urlComponents[2], // registry.ollama.ai
+          urlComponents[4], // library
+          urlComponents[5], // gemma3
+          urlComponents[7]  // 27b
+        ].join("/");
         return `curl -L "${url}" -o "${filename}"`;
 
     }
@@ -120,7 +128,7 @@ export default function ResultsCard({ model_name, result, url }: any) {
             </div >
 
             {/* Curl Download command */}
-            <span className="text-sm text-slate-600 mt-2 ml-2">Curl command to download the manifest (cd to manifest folder)</span>
+            <span className="text-sm text-slate-600 mt-2 ml-2">Curl command to download the manifest (cd to ollama models folder)</span>
             <div className="p-2 rounded-lg border bg-card w-full overflow-x-auto">
                 <div
                     className="text-xs font-mono whitespace-pre cursor-pointer"
@@ -133,14 +141,14 @@ export default function ResultsCard({ model_name, result, url }: any) {
                     {generateManifestCurlCommand()}
                 </div>
             </div>
-            <span className="text-sm text-slate-600 mt-2 ml-2">Curl command to download all blobs (cd to blobs folder)</span>
+            <span className="text-sm text-slate-600 mt-2 ml-2">Curl commands to download all blobs (cd to ollama models folder)</span>
             <div className="p-2 rounded-lg border bg-card w-full overflow-x-auto">
                 <div
                     className="text-xs font-mono whitespace-pre cursor-pointer"
                     onClick={() => {
                         const cmd = generateBlobsCurlCommand();
                         navigator.clipboard.writeText(cmd);
-                        toast.info("Curl command copied to clipboard");
+                        toast.info("Curl commands copied to clipboard");
                     }}
                 >
                     {generateBlobsCurlCommand()}
